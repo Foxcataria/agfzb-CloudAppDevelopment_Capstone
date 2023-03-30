@@ -31,16 +31,62 @@ def contact(request):
         return render(request, 'djangoapp/contact.html', context)
 
 # Create a `login_request` view to handle sign in request
-# def login_request(request):
-# ...
+def login_request(request):
+    context = {}
+    # Check for POST request
+    if request.method == "POST":
+        # Extract the username and password from the POST request
+        username = request.POST['username']
+        password = request.POST['psw']
+        # Check if there is an already registered user with the given credentials
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            # Log the user in and redirect to the applications index page
+            login(request, user)
+            return redirect('djangoapp:index')
+        else:
+            # Return to login page
+            return render(request, 'djangoapp/login.html', context)
+    else:
+        # Return to login page
+        return render(request, 'djangoapp/login.html', context)
 
 # Create a `logout_request` view to handle sign out request
-# def logout_request(request):
-# ...
+def logout_request(request):
+    context = {}
+    # Logout the current user
+    logout(request)
+    # Redirect to the applications index page
+    return redirect('djangoapp:index')
 
 # Create a `registration_request` view to handle sign up request
-# def registration_request(request):
-# ...
+def registration_request(request):
+    context = {}
+    # If GET request is recieved then show the user the applications registration page
+    if request.method == 'GET':
+        return render(request, 'djangoapp/registration.html', context)
+    elif request.method == 'POST':
+        # Extract key elements of the current registering user from the POST request
+        username = request.POST['username']
+        password = request.POST['psw']
+        first_name = request.POST['firstname']
+        last_name = request.POST['lastname']
+        user_exist = False
+        # Check if a user with the same credentials already exists. Otherwise create
+        # the new user, add the user to the applications database and login the user
+        try:
+            User.objects.get(username=username)
+            user_exist = True
+        except:
+            logger.error("New user")
+        if not user_exist:
+            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name,
+                                            password=password)
+            login(request, user)
+            return redirect("djangoapp:index")
+        else:
+            context['message'] = "User already exists."
+            return render(request, 'djangoapp/registration.html', context)
 
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):

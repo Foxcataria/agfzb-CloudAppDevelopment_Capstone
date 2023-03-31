@@ -6,13 +6,64 @@
     {% load static %}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
-
-    <body>
-
-    <!--Add a nav bar here -->
-
-    <!-- Add reviews as cards -->
-
-    </body>
-
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{% url 'djangoapp:index' %}">Best Cars</a>
+            </div>
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                <li>
+                    <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                    <a class="btn btn-link" href="{% url 'djangoapp:logout' %}">Logout</a>
+                    <a class="btn btn-link" href="{% url 'djangoapp:add_review' current_dealer_id %}">Add Review</a>
+                </li>
+                {% else %}
+                <li>
+                    <form class="form-inline" action="{% url 'djangoapp:login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Username" name="username" >
+                            <input type="password" class="form-control" placeholder="Password" name="psw" >
+                            <button class="btn btn-primary" type="submit">Login</button>
+                            <a class="btn btn-link" href="{% url 'djangoapp:registration' %}">Sign Up</a>
+                        </div>
+                    </form>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'djangoapp:index' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'djangoapp:about' %}">About Us</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'djangoapp:contact' %}">Contact Us</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <h5 class="m-5">Reviews for <b>{{current_dealer_name}}</b></h5>
+    <div class="card-columns container mt-5">
+        {% for review in dealer_reviews_list %}
+            <div class="card">
+                <div style="max-height: 2rem">
+                {% if review.sentiment == 'positive' %}
+                    <img class="card-img-left" style="max-height: 2rem; max-width: auto;" src="{{MEDIA_URL}}/emoji/positive.png">
+                {% elif review.sentiment == 'neutral' %}
+                    <img class="card-img-left" style="max-height: 2rem; max-width: auto;" src="{{MEDIA_URL}}/emoji/neutral.png">
+                {% else %}
+                    <img class="card-img-left" style="max-height: 2rem; max-width: auto;" src="{{MEDIA_URL}}/emoji/negative.png">
+                {% endif %}
+            </div>
+                <div class="card-body bg-light">
+                    <h5 class="card-title">{{review.car_make}}, {{review.car_model}}</h5>
+                    <h5 class="card-title">{{review.purchase_date}}</h5>
+                    <p class="card-text">{{review.review}}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
 </html>
